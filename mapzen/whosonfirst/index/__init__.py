@@ -26,6 +26,9 @@ class geojson(mapzen.whosonfirst.export.flatfile):
         # MAYBE: move all of this in to a separate function or make it
         # part of py-mapzen-whosonfirst-validator (20160129/thisisaaronland)
 
+        # MAYBE: use some derivation of https://github.com/whosonfirst/whosonfirst-json-schema
+        # https://github.com/whosonfirst/whosonfirst-json-schema
+
         geom = feature.get('geometry', None)
 
         if not geom:
