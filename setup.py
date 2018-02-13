@@ -29,24 +29,14 @@ version = open("VERSION").read()
 
 setup(
     name='mapzen.whosonfirst.mapshaper.index',
-    namespace_packages=['mapzen', 'mapzen.whosonfirst', 'mapzen.whosonfirst.index', ],
+    namespace_packages=['mapzen', 'mapzen.whosonfirst' ],
     version=version,
     description='Python tools for indexing Who\'s On First documents',
     author='Mapzen',
     url='https://github.com/whosonfirst/py-mapzen-whosonfirst-index',
-    install_requires=[
-        'geojson',
-        'shapely',
-        'mapzen.whosonfirst.placetypes>=0.11',
-        'mapzen.whosonfirst.export>=0.71',
-        'mapzen.whosonfirst.pip.utils>=0.01',
-        'mapzen.whosonfirst.mapshaper.utils>=0.01'
-        ],
-    dependency_links=[
-        # PLEASE FIX ME
-        ],
     packages=packages,
     scripts=[
+        'scripts/wof-index'
         ],
     download_url='https://github.com/whosonfirst/py-mapzen-whosonfirst-index/releases/tag/' + version,
     license='BSD')

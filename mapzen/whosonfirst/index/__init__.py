@@ -1,75 +1,75 @@
 # https://pythonhosted.org/setuptools/setuptools.html#namespace-packages
 __import__('pkg_resources').declare_namespace(__name__)
 
-import logging
-import shapely.geometry
+import json
+import os.path
+import sqlite3
 
-import mapzen.whosonfirst.placetypes
-import mapzen.whosonfirst.export
-import mapzen.whosonfirst.pip.utils
-import mapzen.whosonfirst.mapshaper.utils
+import mapzen.whosonfirst.utils
 
-class geojson(mapzen.whosonfirst.export.flatfile):
+class indexer:
 
-    def __init__(self, root, **kwargs):
-
-        self.root = root
-
-        # TO DO: pip-server args
-
-        self.mapshaper = kwargs.get('mapshaper', False)
-
-        mapzen.whosonfirst.export.flatfile.__init__(self, root, **kwargs)
-
-    def index_feature(self, feature, **kwargs):
-
-        # MAYBE: move all of this in to a separate function or make it
-        # part of py-mapzen-whosonfirst-validator (20160129/thisisaaronland)
-
-        # MAYBE: use some derivation of https://github.com/whosonfirst/whosonfirst-json-schema
-        # https://github.com/whosonfirst/whosonfirst-json-schema
-
-        geom = feature.get('geometry', None)
-
-        if not geom:
-            raise Exception, "Missing geometry"
-
-        try:
-            shapely.geometry.asShape(geom)
-        except Exception, e:
-            raise Exception, "Invalid geometry (%s)" % e
-
-        props = feature.get('properties', None)
-
-        if not props:
-            raise Exception, "Missing properties"
+    def __init__ (self, mode, callback):
         
-        required = (
-            'wof:name',
-            'wof:placetype',
-            'wof:country'
-        )
+        self.mode = mode
+        self.callback = callback
 
-        for what in required:
+    def process(self, feature):
+        self.callback(feature)
 
-            if not props.get(what, None):
-                raise Exception, "Missing required field %s" % what
-                
-        if not props.get('iso:country', None):
-            props['iso:country'] = props['wof:country']
+    def index_paths(self, paths):
+
+        for path in paths:
+            self.index_path(path)
+            
+    def index_path(self, path):
+
+        if self.mode == "files":
+            self.index_path(path)
+        elif self.mode == "directory":
+            self.index_directory(path)
+        elif self.mode == "repo":
+            self.index_repo(path)
+        elif self.mode == "sqlite":
+            self.index_sqlite(path)
+        else:
+            raise Exception, "Invalid or unsupported mode"
+
+    def index_directory(self, path):
+
+        iter = mapzen.whosonfirst.utils.crawl(path, inflate=True)
+
+        for f in iter:
+            self.process(f)
+
+    def index_feature(self, path):
+
+        f = mapzeen.whosonfirst.utils.load_file(path)
+        return self.process(f)
+
+    def index_repo(self, path):
+
+        data = os.path.join(path, "data")
+        return self.index_repo(data)
+
+    def index_sqlite(self, path):
         
-        if not mapzen.whosonfirst.placetypes.is_valid_placetype(props['wof:placetype']):
-            raise Exception, "Invalid placetype"
+        conn = sqlite3.connect(path)
 
-        # MAYBE: do wof:id minting here (rather than in py-mz-wof-export)
-        # (20160129/thisisaaronland)
-
-        # TODO: pip-server flags 
-
-        mapzen.whosonfirst.pip.utils.append_hierarchy_and_parent_pip(feature, data_root=[self.root])
-
-        if self.mapshaper:
-            mapzen.whosonfirst.mapshaper.utils.append_mapshaper_centroid(feature, mapshaper=self.mapshaper)
+        rsp = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        has_table = False
         
-        path = self.export_feature(feature, **kwargs)
-        return path
+        for row in rsp:
+            if row[0] == "geojson":
+                has_table = True
+                break
+
+        if not has_table:
+            raise Exception, "database is issing 'geojson' table"
+        
+        rsp = conn.execute("SELECT body FROM geojson")
+
+        for row in rsp:
+            f = json.loads(row[0])
+            self.process(f)
+        
