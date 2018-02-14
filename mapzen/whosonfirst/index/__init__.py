@@ -15,42 +15,60 @@ class indexer:
         self.callback = callback
 
     def process(self, feature):
-        self.callback(feature)
+        yield self.callback(feature)
 
     def index_paths(self, paths):
 
-        for path in paths:
-            self.index_path(path)
-            
+        for i in self.iter_paths(paths):
+            pass
+
     def index_path(self, path):
 
-        if self.mode == "files":
-            self.index_path(path)
-        elif self.mode == "directory":
-            self.index_directory(path)
+        for i in self.iter_path(path):
+            pass
+        
+    def iter_paths(self, paths):    
+
+        for path in paths:
+            
+            iter = self.iter_path(path)
+
+            for i in iter:
+                yield i
+            
+    def iter_path(self, path):
+
+        iter = None
+        
+        if self.mode == "directory":
+            iter = self.index_directory(path)
+                
         elif self.mode == "repo":
-            self.index_repo(path)
+            iter = self.index_repo(path)
+                
         elif self.mode == "sqlite":
-            self.index_sqlite(path)
+            iter = self.index_sqlite(path)
+                
         else:
             raise Exception, "Invalid or unsupported mode"
 
+        for i in iter:
+            for j in i:
+                yield j
+            
     def index_directory(self, path):
 
         iter = mapzen.whosonfirst.utils.crawl(path, inflate=True)
 
         for f in iter:
-            self.process(f)
-
-    def index_feature(self, path):
-
-        f = mapzeen.whosonfirst.utils.load_file(path)
-        return self.process(f)
+            yield self.process(f)
 
     def index_repo(self, path):
 
         data = os.path.join(path, "data")
-        return self.index_repo(data)
+        
+        for i in self.index_directory(data):
+            yield i
 
     def index_sqlite(self, path):
         
@@ -71,5 +89,5 @@ class indexer:
 
         for row in rsp:
             f = json.loads(row[0])
-            self.process(f)
+            yield self.process(f)
         

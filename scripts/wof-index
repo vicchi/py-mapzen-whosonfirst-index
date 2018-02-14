@@ -26,6 +26,4 @@ if __name__ == '__main__':
         logging.info("index %s" % props["wof:id"])
 
     idx = mapzen.whosonfirst.index.indexer(options.mode, cb)
-    
-    for path in args:
-        idx.index_path(path)
+    idx.index_paths(args)
