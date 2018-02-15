@@ -7,6 +7,17 @@ import sqlite3
 
 import mapzen.whosonfirst.utils
 
+def valid_modes():
+    
+    return (
+        "directory",
+        "filelist",
+        "files",
+        "meta",
+        "repo",
+        "sqlite"
+    )
+
 class indexer:
 
     def __init__ (self, mode, callback):
