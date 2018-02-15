@@ -42,7 +42,16 @@ class indexer:
         
         if self.mode == "directory":
             iter = self.index_directory(path)
-                
+
+        elif self.mode == "filelist":
+            iter = self.index_filelist(path)
+
+        elif self.mode == "files":
+            iter = self.index_file(path)
+
+        elif self.mode == "meta":
+            raise Exception, "Please impliment me"
+        
         elif self.mode == "repo":
             iter = self.index_repo(path)
                 
@@ -55,6 +64,23 @@ class indexer:
         for i in iter:
             for j in i:
                 yield j
+
+    def index_file(self, path):
+
+        f = mapzen.whosonfirst.utils.load_file(path)
+        yield self.process(f)
+
+    def index_files(self, paths):
+        
+        for path in paths:
+            yield self.index_file(path)
+
+    def index_filelist(self, path):
+
+        fh = open(path, "r")
+
+        for ln in fh:
+            yield self.index_file(ln.strip())
             
     def index_directory(self, path):
 
