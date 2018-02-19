@@ -2,6 +2,15 @@
 
 Python tools for indexing Who's On First documents.
 
-## Caveats
+## Install
 
-DO NOT USE THIS YET. NO. This is not ready for general purpose usage yet.
+```
+sudo pip install -r requirements.txt .
+```
+
+## IMPORTANT
+
+This library is provided as-is, right now. It lacks proper
+documentation which will probably make it hard for you to use unless
+you are willing to poke and around and investigate things on your
+own.
