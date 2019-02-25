@@ -91,7 +91,8 @@ class indexer:
         fh = open(path, "r")
 
         for ln in fh:
-            yield self.index_file(ln.strip())
+            for f in self.index_file(ln.strip()):
+                yield f
             
     def index_directory(self, path):
 
