@@ -28,7 +28,7 @@ desc = open("README.md").read()
 version = open("VERSION").read()
 
 setup(
-    name='mapzen.whosonfirst.mapshaper.index',
+    name='mapzen.whosonfirst.index',
     namespace_packages=['mapzen', 'mapzen.whosonfirst' ],
     version=version,
     description='Python tools for indexing Who\'s On First documents',
