@@ -4,6 +4,7 @@ __import__('pkg_resources').declare_namespace(__name__)
 import json
 import os.path
 import sqlite3
+import logging
 
 import mapzen.whosonfirst.utils
 
@@ -30,12 +31,12 @@ class indexer:
 
     def index_paths(self, paths):
 
-        for i in self.iter_paths(paths):
+        for _ in self.iter_paths(paths):
             pass
 
     def index_path(self, path):
 
-        for i in self.iter_path(path):
+        for _ in self.iter_path(path):
             pass
         
     def iter_paths(self, paths):    
@@ -46,7 +47,7 @@ class indexer:
 
             for i in iter:
                 yield i
-            
+                
     def iter_path(self, path):
 
         iter = None
@@ -61,7 +62,10 @@ class indexer:
             iter = self.index_file(path)
 
         elif self.mode == "meta":
-            raise Exception, "Please impliment me"
+            # Python 3 migration-ify
+            # (20200910/vicchi)
+           
+            raise Exception("Please implement me")
         
         elif self.mode == "repo":
             iter = self.index_repo(path)
@@ -70,7 +74,9 @@ class indexer:
             iter = self.index_sqlite(path)
                 
         else:
-            raise Exception, "Invalid or unsupported mode"
+            # Python 3 migration-ify
+            # (20200910/vicchi)
+            raise Exception("Invalid or unsupported mode")
 
         for i in iter:
             for j in i:
@@ -121,7 +127,9 @@ class indexer:
                 break
 
         if not has_table:
-            raise Exception, "database is issing 'geojson' table"
+            # Python 3 migration-ify
+            # (20200910/vicchi)
+            raise Exception("database is missing 'geojson' table")
         
         rsp = conn.execute("SELECT body FROM geojson")
 
